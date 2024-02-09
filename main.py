@@ -1,10 +1,10 @@
 from fastapi import FastAPI
-from src.model.keywords import KeywordExtractor
+from src.model.keywords import KeywordExtractorYAKE
 import json
 
 
 app = FastAPI()
-keyword_extractor = KeywordExtractor()
+keyword_extractor = KeywordExtractorYAKE()
 
 
 @app.get('/')

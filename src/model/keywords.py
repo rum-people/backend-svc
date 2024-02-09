@@ -1,8 +1,8 @@
-from base import Model
+from .base import Model
 import yake
 
 
-class KeywordExtractor(Model):
+class KeywordExtractorYAKE(Model):
     '''
         This is Keyword Extractor class which extracts keywords from the texts.
     '''
