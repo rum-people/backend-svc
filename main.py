@@ -1,10 +1,11 @@
 from fastapi import FastAPI
-from src.model.keywords import KeywordExtractorYAKE
+from src.model.keywords import KeywordExtractorYAKE, KeywordExtractorKeyBERT
 import json
 
 
 app = FastAPI()
-keyword_extractor = KeywordExtractorYAKE()
+keyword_extractor_yake = KeywordExtractorYAKE()
+keyword_extractor_bert = KeywordExtractorKeyBERT()
 
 
 @app.get('/')
@@ -14,7 +15,7 @@ def get_test_connection():
 
 @app.get('/technical/keywords')
 def get_keywords_of_text(text):
-    keywords = keyword_extractor.predict(texts=[text])
+    keywords = keyword_extractor_bert.predict(texts=[text])
     return {'keywords': keywords[0]}
 
 
