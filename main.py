@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from src.model.keywords import KeywordExtractorYAKE, KeywordExtractorKeyBERT
+from src.model.sentiment import BertSentimentAnalyser
 import json
 
 
 app = FastAPI()
 keyword_extractor_yake = KeywordExtractorYAKE()
 keyword_extractor_bert = KeywordExtractorKeyBERT()
+sentiment_analyser_bert = BertSentimentAnalyser()
 
 
 @app.get('/')
@@ -17,6 +19,12 @@ def get_test_connection():
 def get_keywords_of_text(text):
     keywords = keyword_extractor_bert.predict(texts=[text])
     return {'keywords': keywords[0]}
+
+
+@app.get('/technical/sentiment')
+def get_sentiment_analysis(text: str):
+    analysis = sentiment_analyser_bert.predict(texts=[text])
+    return {'sentiment': analysis[0]}
 
 
 @app.get('/posts')
