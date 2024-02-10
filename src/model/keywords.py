@@ -37,6 +37,6 @@ class KeywordExtractorKeyBERT(Model):
         :texts: The texts we are predicting over
         :return: returns lists of keywords in order in which texts came.
         '''
-        keywords = [self.model.extract_keywords(text) for text in texts]
+        keywords = self.model.extract_keywords(texts)
 
         return keywords
