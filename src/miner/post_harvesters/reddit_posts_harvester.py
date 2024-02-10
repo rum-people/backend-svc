@@ -34,7 +34,7 @@ class RedditPostsHarvester(base.BasePostsHarvester):
         self.http = _RedditHttpConnector(use_script, secret, username, password)
         self.popular_subredits_endpoint = "https://oauth.reddit.com/subreddits/popular"
         self.subredit_popular_template = 'https://oauth.reddit.com{}/hot'
-        self.number_of_popular_subredits = 100
+        self.number_of_popular_subredits = 50
         self.max_posts_per_request = 50
         self.base_link = "www.reddit.com"
 
@@ -61,7 +61,7 @@ class RedditPostsHarvester(base.BasePostsHarvester):
                 params = {'limit': number_of_posts, 'after': subredit['fullname']}
                 posts_data = self.http.get(self.subredit_popular_template.format(subredit['url']), params)
                 subredit['fullname'] = posts_data['data']['after']
-                posts.append(self.convert(posts_data))
+                posts.extend(self.convert(posts_data))
         
         return posts        
 
@@ -70,7 +70,7 @@ class RedditPostsHarvester(base.BasePostsHarvester):
         for post in json_data['data']['children']:
             post_data = post['data']
             posts.append({
-                'text': post_data['title'] + '\n' + post_data['selftext'],
+                'text': post_data['title'] + "\n" + post_data['selftext'],
                 'created_utc': post_data['created_utc'],
                 'link': self.base_link + post_data['permalink']
             })
