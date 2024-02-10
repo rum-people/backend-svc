@@ -1,12 +1,27 @@
 from fastapi import FastAPI
-from src.model.keywords import KeywordExtractorYAKE, KeywordExtractorKeyBERT
+from src.model.keywords import KeywordExtractorKeyBERT
 from src.model.sentiment import BertSentimentAnalyser
-import sched, time
+from src.miner.post_harvesters import RedditPostsHarvester
+from src.miner.scrapper import Scrapper
+import psycopg2
 
 
 app = FastAPI()
 keyword_extractor_bert = KeywordExtractorKeyBERT()
 sentiment_analyser_bert = BertSentimentAnalyser()
+connection = psycopg2.connect(database="db_name",
+                        host="db_host",
+                        user="db_user",
+                        password="db_pass",
+                        port="db_port")
+scrapper = Scrapper(
+    harvesters=[RedditPostsHarvester()],
+    keywords_extractor=keyword_extractor_bert,
+    sentiment_analysator=sentiment_analyser_bert,
+    connection=connection
+)
+
+scrapper.start()
 
 
 @app.get('/')
