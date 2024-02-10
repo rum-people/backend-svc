@@ -4,16 +4,26 @@ from src.model.sentiment import BertSentimentAnalyser
 from src.miner.post_harvesters import RedditPostsHarvester
 from src.miner.scrapper import Scrapper
 import psycopg2
+import os
+from dotenv import load_dotenv
 
+
+load_dotenv()
+
+DATABASE_HOST = os.getenv('DATABASE_HOST')
+DATABASE_PORT = os.getenv('DATABASE_PORT')
+DATABASE_USER = os.getenv('DATABASE_USER')
+DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD')
+DATABASE_NAME = os.getenv('DATABASE_NAME')
 
 app = FastAPI()
 keyword_extractor_bert = KeywordExtractorKeyBERT()
 sentiment_analyser_bert = BertSentimentAnalyser()
-connection = psycopg2.connect(database='rum',
-                        host='postgres',
-                        user='postgres',
-                        password='password',
-                        port='5432')
+connection = psycopg2.connect(database=DATABASE_NAME,
+                        host=DATABASE_HOST,
+                        user=DATABASE_USER,
+                        password=DATABASE_PASSWORD,
+                        port=DATABASE_PORT)
 
 if connection.status:
     print('Connection to the database is down.')    

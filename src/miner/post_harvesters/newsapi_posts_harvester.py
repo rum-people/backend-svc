@@ -19,51 +19,51 @@ class _NewsAPIHttpConnector:
         
 
 class NewsAPIPostsHarvester(BasePostsHarvester):
-        def __init__(self, api_key):
-            self.http = _NewsAPIHttpConnector(api_key)
-            self.url = "https://newsapi.org/v2/everything"
-            self.max_posts_per_request = 100
+    def __init__(self, api_key):
+        self.http = _NewsAPIHttpConnector(api_key)
+        self.url = "https://newsapi.org/v2/everything"
+        self.max_posts_per_request = 100
+    
+    def get_posts(self, days: int, quantity: int=-1) -> list:
+        if quantity == -1:
+            quantity = 100
         
-        def get_posts(self, days: int, quantity: int=-1) -> list:
-            if quantity == -1:
-                quantity = 100
-            
-            posts_per_day = quantity//days
-            
-            posts = []
-            date = dt.datetime.today()
+        posts_per_day = quantity//days
+        
+        posts = []
+        date = dt.datetime.today()
+        date -= dt.timedelta(days=1)
+
+        for i in range(days):
+            date_str = date.strftime('%Y-%m-%d')
+            next_posts = self.get_posts_by_date(date_str, posts_per_day)
+            posts.extend(next_posts)
             date -= dt.timedelta(days=1)
-
-            for i in range(days):
-                date_str = date.strftime('%Y-%m-%d')
-                next_posts = self.get_posts_by_date(date_str, posts_per_day)
-                posts.extend(next_posts)
-                date -= dt.timedelta(days=1)
-            
-            return posts
-
-        def get_posts_by_date(self, date, quantity) -> list:
-            posts = []
-            page = 1
-            while quantity > 0:
-                number_of_posts = min(quantity, self.max_posts_per_request)
-                params = {'pageSize': number_of_posts, 'page': page, 'from': date, 'to': date}
-                posts_data = self.http.get(self.url, params)
-                quantity -= number_of_posts
-                page += 1
-                posts.extend(self.convert(posts_data))
-            
-            return posts
         
-        def convert(self, json_data):
-            posts = []
-            for post in json_data['articles']:
-                posts.append({
-                    'text': post['title'] + "\n" + post['description'],
-                    'created_utc': post['publishedAt'], # need to convert to utc timestamp
-                    'link': post['url']
-                })
-            
-            return posts
+        return posts
 
-            
+    def get_posts_by_date(self, date, quantity) -> list:
+        posts = []
+        page = 1
+        while quantity > 0:
+            number_of_posts = min(quantity, self.max_posts_per_request)
+            params = {'pageSize': number_of_posts, 'page': page, 'from': date, 'to': date}
+            posts_data = self.http.get(self.url, params)
+            quantity -= number_of_posts
+            page += 1
+            posts.extend(self.convert(posts_data))
+        
+        return posts
+    
+    def convert(self, json_data):
+        posts = []
+        for post in json_data['articles']:
+            posts.append({
+                'text': post['title'] + "\n" + post['description'],
+                'created_utc': post['publishedAt'], # need to convert to utc timestamp
+                'link': post['url']
+            })
+        
+        return posts
+
+        
