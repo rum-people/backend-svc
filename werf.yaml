@@ -1,7 +1,7 @@
 configVersion: 1
-project: 'service'
+project: 'python-service'
 ---
-image: builder
+image: service
 from: python:3.10-alpine
 docker:
   WORKDIR: /app
@@ -15,4 +15,5 @@ git:
         - "**/*"
 shell:
   setup:
+    - apk update && apk add --no-cache gcc libc-dev make
     - pip3 install --no-cache -r /app/requirements.txt
