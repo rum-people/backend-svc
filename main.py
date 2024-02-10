@@ -9,11 +9,11 @@ import psycopg2
 app = FastAPI()
 keyword_extractor_bert = KeywordExtractorKeyBERT()
 sentiment_analyser_bert = BertSentimentAnalyser()
-connection = psycopg2.connect(database="db_name",
-                        host="db_host",
-                        user="db_user",
-                        password="db_pass",
-                        port="db_port")
+connection = psycopg2.connect(database='rum',
+                        host='postgres',
+                        user='postgres',
+                        password='password',
+                        port='5432')
 scrapper = Scrapper(
     harvesters=[RedditPostsHarvester()],
     keywords_extractor=keyword_extractor_bert,
