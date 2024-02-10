@@ -1,4 +1,4 @@
-import base_posts_harvester as base
+from .base_posts_harvester import BasePostsHarvester
 import requests
 
 class _RedditHttpConnector:
@@ -29,7 +29,7 @@ class _RedditHttpConnector:
 
         
 
-class RedditPostsHarvester(base.BasePostsHarvester):
+class RedditPostsHarvester(BasePostsHarvester):
     def __init__(self, use_script, secret, username, password):
         self.http = _RedditHttpConnector(use_script, secret, username, password)
         self.popular_subredits_endpoint = "https://oauth.reddit.com/subreddits/popular"

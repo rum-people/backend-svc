@@ -1,4 +1,4 @@
-import base_posts_harvester as base
+from .base_posts_harvester import BasePostsHarvester
 import requests
 import datetime as dt
 
@@ -18,7 +18,7 @@ class _NewsAPIHttpConnector:
 
         
 
-class NewsAPIPostsHarvester(base.BasePostsHarvester):
+class NewsAPIPostsHarvester(BasePostsHarvester):
         def __init__(self, api_key):
             self.http = _NewsAPIHttpConnector(api_key)
             self.url = "https://newsapi.org/v2/everything"
