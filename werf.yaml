@@ -15,4 +15,4 @@ git:
         - "**/*"
 shell:
   setup:
-    - pip3 install --no-cache -r requirements.txt
+    - pip3 install --no-cache -r /app/requirements.txt
