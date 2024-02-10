@@ -1,0 +1,18 @@
+configVersion: 1
+project: 'python-service'
+---
+image: service
+from: python:3.10-bullseye
+docker:
+  WORKDIR: /app
+  ENTRYPOINT: uvicorn
+  CMD: [ "main:app", "--reload" , "--host", "0.0.0.0"]
+git:
+  - add: /
+    to: /app
+    stageDependencies:
+      setup:
+        - "**/*"
+shell:
+  setup:
+    - pip3 install --no-cache -r /app/requirements.txt

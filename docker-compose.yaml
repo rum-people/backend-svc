@@ -1,0 +1,5 @@
+services:
+  backend-svc:
+    build: .
+    ports:
+      - "8000:8000"
