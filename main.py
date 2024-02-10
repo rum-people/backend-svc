@@ -25,18 +25,18 @@ connection = psycopg2.connect(database=DATABASE_NAME,
                         password=DATABASE_PASSWORD,
                         port=DATABASE_PORT)
 
-if connection.status:
-    print('Connection to the database is down.')    
-    exit()
-
-with connection as cursor:
-    cursor.execute(open("schema.sql", "r").read())
+with connection.cursor() as cursor:
+    cursor.execute(open('schema/init.sql', 'r').read())
 
 scrapper = Scrapper(
-    harvesters=[RedditPostsHarvester()],
+    harvesters=[RedditPostsHarvester(use_script = "XYvimDksXdYhPOM2uA5tdg",
+        secret = "FD0xriKOeZF155WK5X4jrqrA_4PMyQ",
+        username = "Inner_Painter9381",
+        password = "gSqp34igj$^a%wK")],
     keywords_extractor=keyword_extractor_bert,
     sentiment_analysator=sentiment_analyser_bert,
-    connection=connection
+    connection=connection,
+    quantity=1000
 )
 
 scrapper.start()

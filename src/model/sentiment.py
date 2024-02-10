@@ -11,4 +11,5 @@ class BertSentimentAnalyser(Model):
         
     
     def predict(self, texts: list) -> list:
-        return self.model.predict(texts)
+        predictions = [self.model.predict(text) for text in texts]
+        return predictions
