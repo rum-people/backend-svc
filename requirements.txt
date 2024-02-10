@@ -4,4 +4,5 @@ pandas
 uvicorn[standard]
 yake
 keybert
+psycopg2
 transformers

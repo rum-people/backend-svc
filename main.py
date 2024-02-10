@@ -1,11 +1,10 @@
 from fastapi import FastAPI
 from src.model.keywords import KeywordExtractorYAKE, KeywordExtractorKeyBERT
 from src.model.sentiment import BertSentimentAnalyser
-import json
+import sched, time
 
 
 app = FastAPI()
-keyword_extractor_yake = KeywordExtractorYAKE()
 keyword_extractor_bert = KeywordExtractorKeyBERT()
 sentiment_analyser_bert = BertSentimentAnalyser()
 
@@ -28,7 +27,7 @@ def get_sentiment_analysis(text: str):
 
 
 @app.get('/posts')
-def get_posts(keyword: str | None=None, scoial_network: str | None=None, quantity: int | None=10):
+def get_posts(keyword: str | None=None, social_network: str | None=None, quantity: int | None=10):
     return [{
         'post' : 'link or text',
         'socialNetwork': 'reddit',
