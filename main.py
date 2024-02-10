@@ -28,15 +28,55 @@ def get_sentiment_analysis(text: str):
 
 
 @app.get('/posts')
-def get_post_by_keywords_soc_network(keywords: list, scoial_network: str):
-    return {'error': 0}
+def get_posts(keyword: str | None=None, scoial_network: str | None=None, quantity: int | None=10):
+    return [{
+        'post' : 'link or text',
+        'socialNetwork': 'reddit',
+        'emotions' : [
+            {
+                'label' : 'joy',
+                'value' : 0.3
+            },
+            {
+                'label' : 'anger',
+                'value' : 0.4
+            },
+            {
+                'label' : 'fear',
+                'value' : 0.9
+            }
+        ] 
+    }]
 
 
-@app.get('/analytics/keywords/{days}')
-def get_analytics_keywords(days: int, social_network: str):
-    return {'error': 0}
+@app.get('/analytics/keywords')
+def get_analytics_keywords(days: int, social_network: str | None=None, keyword : str | None=None):
+    return [
+        {
+            'keyword' : 'some_keyword',
+            'timestamp' : 'DD/MM/YY HH:MM:SS',
+            'frequency' : 10
+        },
+    ]
 
-
-@app.get('/analytics/sentiment/{days}')
-def get_analytics_sentiment(days: int, social_network: str):
-    return {'error': 0}
+@app.get('/analytics/sentiment')
+def get_analytics_sentiment(days: int, social_network: str | None=None, keyword : str | None=None):
+    return [
+        {
+            'emotions' : [
+                {
+                    'label' : 'joy',
+                    'value' : 0.3
+                },
+                {
+                    'label' : 'anger',
+                    'value' : 0.4
+                },
+                {
+                    'label' : 'fear',
+                    'value' : 0.9
+                }
+            ],
+            'timestamp' : 'DD/MM/YY HH:MM:SS'
+        }
+    ]
