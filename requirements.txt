@@ -6,3 +6,4 @@ yake
 keybert
 psycopg2
 transformers
+python-dotenv
