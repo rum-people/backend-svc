@@ -85,3 +85,6 @@ class RedditPostsHarvester(base.BasePostsHarvester):
             subredits.append(subredit['data']['url'])
         
         return subredits
+    
+    def get_name(self):
+        return 'Reddit'
