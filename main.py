@@ -14,6 +14,14 @@ connection = psycopg2.connect(database='rum',
                         user='postgres',
                         password='password',
                         port='5432')
+
+if connection.status:
+    print('Connection to the database is down.')    
+    exit()
+
+with connection as cursor:
+    cursor.execute(open("schema.sql", "r").read())
+
 scrapper = Scrapper(
     harvesters=[RedditPostsHarvester()],
     keywords_extractor=keyword_extractor_bert,
