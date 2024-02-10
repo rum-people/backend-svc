@@ -1,23 +1,29 @@
 services:
   backend-svc:
     build: .
+    restart: unless-stopped
     ports:
-      - "8000:8000"
-  postgres:
-    image: postgres
+      - 8000:8000
+    depends_on:
+      backend-svc-pgdb:
+        condition: service_healthy
+
+  backend-svc-pgdb:
+    image: postgres:16.1-alpine3.19
     restart: always
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=rum
-    volumes:
-      - ./schema/:/docker-entrypoint-initdb.d/
-      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
+    environment:
+      - POSTGRES_USER=backend-svc
+      - POSTGRES_PASSWORD=backend-svc
+      - POSTGRES_DB=backend-svc
+    volumes:
+      - backend-svc-pgdb-data:/var/lib/postgresql/data    
 
 volumes:
-  postgres-data:
+  backend-svc-pgdb-data:
