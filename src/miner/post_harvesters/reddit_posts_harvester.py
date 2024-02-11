@@ -90,8 +90,7 @@ class RedditPostsHarvester(BasePostsHarvester):
                 if self.is_accepted_date(date, converted_datra) and not intermidiate_point:
                     intermidiate_point = True
                     continue
-                if intermidiate_point:
-                    finding_point = True
+                finding_point = True
                 print("post_data", len(converted_datra), flush=True)
 
                 posts.extend(converted_datra)
