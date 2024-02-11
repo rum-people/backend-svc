@@ -1,0 +1,39 @@
+on:
+  push:
+    tags:
+      - '*'
+      
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  converge:
+    name: Converge
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - uses: werf/actions/install@v1.2
+
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+
+      - name: Version and repository logging
+        run: |
+          werf version
+          docker version
+          echo $GITHUB_REPOSITORY
+      
+      - name: Get the tag name
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Build and push
+        run: |
+          . $(werf ci-env github --as-file) 
+          werf build --save-build-report=true --build-report-path=images-report.json
+          docker pull $(cat images-report.json | jq -r .Images.service.DockerImageName)
+          docker tag $(cat images-report.json | jq -r .Images.service.DockerImageName) ghcr.io/$GITHUB_REPOSITORY:$TAG_NAME
+          docker push ghcr.io/$GITHUB_REPOSITORY:$TAG_NAME
