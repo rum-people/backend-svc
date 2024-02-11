@@ -32,10 +32,11 @@ with connection.cursor() as cursor:
 connection.commit()
 
 scrapper = Scrapper(
-    harvesters=[RedditPostsHarvester(use_script = "XYvimDksXdYhPOM2uA5tdg",
-        secret = "FD0xriKOeZF155WK5X4jrqrA_4PMyQ",
-        username = "Inner_Painter9381",
-        password = "gSqp34igj$^a%wK"),
+    # RedditPostsHarvester(use_script = "XYvimDksXdYhPOM2uA5tdg",
+    #     secret = "FD0xriKOeZF155WK5X4jrqrA_4PMyQ",
+    #     username = "Inner_Painter9381",
+    #     password = "gSqp34igj$^a%wK"),
+    harvesters=[
         NewsAPIPostsHarvester(
             api_key='17712fe5c46f444ca38f3979cb0b5d3f'
         )],

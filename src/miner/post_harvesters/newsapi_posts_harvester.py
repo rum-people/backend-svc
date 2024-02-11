@@ -43,13 +43,12 @@ class NewsAPIPostsHarvester(BasePostsHarvester):
     def get_posts_by_date(self, date, quantity) -> list:
         posts = []
         page = 1
-        while quantity > 0:
-            number_of_posts = min(quantity, self.max_posts_per_request)
-            params = {'pageSize': number_of_posts, 'page': page, 'from': date, 'to': date}
-            posts_data = self.http.get(self.url, params)
-            quantity -= number_of_posts
-            page += 1
-            posts.extend(self.convert(posts_data))
+        number_of_posts = 100
+        params = {'pageSize': number_of_posts, 'page': page, 'from': date, 'to': date}
+        posts_data = self.http.get(self.url, params)
+        quantity -= number_of_posts
+        page += 1
+        posts.extend(self.convert(posts_data))
         
         return posts
     

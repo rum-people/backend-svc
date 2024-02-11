@@ -87,8 +87,8 @@ class RedditPostsHarvester(BasePostsHarvester):
                     break
                 subredit['fullname'] = posts_data['data']['after']
                 converted_datra = self.convert(posts_data)
-                # if not self.is_accepted_date(date, converted_datra):
-                    # continue
+                if not self.is_accepted_date(date, converted_datra):
+                    continue
 
                 finding_point = True
                 print("post_data", len(converted_datra), flush=True)
