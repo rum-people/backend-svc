@@ -134,8 +134,8 @@ def get_analytics_keywords(response: Response, days: int, keyword : str, social_
     with connection.cursor() as cursor:
         providers = extract_providers_query('p.provider_name', social_network)
 
-        current_date = datetime.now()
         delta = timedelta(days=1)
+        current_date = datetime.now() - delta
 
         for _ in range(days):
             
@@ -179,7 +179,7 @@ def get_analytics_sentiment(response: Response, days: int, social_network: str |
 
     with connection.cursor() as cursor:
         delta = timedelta(days=1)
-        current_date = datetime.now()
+        current_date = datetime.now() - delta
 
         for _ in range(days):
             text_date = datetime.strftime(current_date, '%Y-%m-%d')
