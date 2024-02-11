@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from src.model.keywords import KeywordExtractorKeyBERT
 from src.model.sentiment import BertSentimentAnalyser
 from src.miner.post_harvesters import RedditPostsHarvester, NewsAPIPostsHarvester
@@ -71,7 +71,8 @@ def get_sentiment_analysis(text: str):
 
 
 @app.get('/posts')
-def get_posts(keyword: str | None=None, social_network: str | None=None, quantity: int | None=10):
+def get_posts(response: Response, keyword: str | None=None, social_network: str | None=None, quantity: int | None=10):
+    response.headers['Access-Control-Allow-Origin'] = '*'
     providers = extract_providers_query('p.provider_name', social_network)
 
     with connection.cursor() as cursor:
@@ -95,7 +96,8 @@ def get_posts(keyword: str | None=None, social_network: str | None=None, quantit
 
 
 @app.get('/analytics/keywords/top')
-def get_top_keywords(days: int, social_network: str | None=None):
+def get_top_keywords(response: Response, days: int, social_network: str | None=None):
+    response.headers['Access-Control-Allow-Origin'] = '*'
     with connection.cursor() as cursor:
         providers = extract_providers_query('provider_name', social_network)
 
@@ -124,7 +126,9 @@ def get_top_keywords(days: int, social_network: str | None=None):
 
 
 @app.get('/analytics/keywords')
-def get_analytics_keywords(days: int, keyword : str, social_network: str | None=None):
+def get_analytics_keywords(response: Response, days: int, keyword : str, social_network: str | None=None):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+
     result = []
     with connection.cursor() as cursor:
         providers = extract_providers_query('p.provider_name', social_network)
@@ -168,7 +172,8 @@ def get_analytics_keywords(days: int, keyword : str, social_network: str | None=
 
 
 @app.get('/analytics/sentiment')
-def get_analytics_sentiment(days: int, social_network: str | None=None, keyword : str | None=None):
+def get_analytics_sentiment(response: Response, days: int, social_network: str | None=None, keyword : str | None=None):
+    response.headers['Access-Control-Allow-Origin'] = '*'
     data = []
 
     with connection.cursor() as cursor:
