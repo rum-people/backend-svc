@@ -44,7 +44,7 @@ class Scrapper(Thread):
             elif trait['score'] > max_score:
                 max_score = trait['score']
                 index_max = index
-        return index_max
+        return raw_traits[index_max]['label']
     
     def _insert_entry(self, cursor, harvester_name: str, post: dict):
         text = post['text']
