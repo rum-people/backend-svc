@@ -59,6 +59,7 @@ class NewsAPIPostsHarvester(BasePostsHarvester):
         posts = []
         for post in json_data['articles']:
             posts.append({
+                'title': post['title'],
                 'text': post['title'] + "\n" + post['description'],
                 'created_utc': post['publishedAt'], # need to convert to utc timestamp
                 'link': post['url']

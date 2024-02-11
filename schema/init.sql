@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS posts (
     id SERIAL PRIMARY KEY,
     provider_name VARCHAR(255),
+    title TEXT NOT NULL,
     content TEXT NOT NULL,
     created_at TIMESTAMP,
     emotional_trait VARCHAR(255),

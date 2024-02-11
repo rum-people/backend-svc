@@ -54,9 +54,9 @@ class Scrapper(Thread):
 
         cursor.execute(
             '''
-            INSERT INTO posts (provider_name, content, created_at, emotional_trait, link)
-            VALUES (%s, %s, %s, %s, %s) RETURNING id;
-            ''', (harvester_name, text, post['created_utc'], emotional_trait, post['link'])
+            INSERT INTO posts (provider_name, title, content, created_at, emotional_trait, link)
+            VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;
+            ''', (harvester_name, post['title'], text, post['created_utc'], emotional_trait, post['link'])
         )
 
         id = cursor.fetchone()[0]
@@ -74,15 +74,21 @@ class Scrapper(Thread):
         print('Thread on harvesting data has started!')
         while not self._stop:
             cursor = self.connection.cursor()
-            
-            for harvester in self.harvesters:
-                posts = harvester.get_posts(days=self.days, quantity=self.quantity)
-                
-                for post in posts:
-                    self._insert_entry(
-                        cursor=cursor,
-                        harvester_name=harvester.get_name(),
-                        post=post
-                    )
 
-            time.sleep(self.delay)
+            quantity = self.quantity
+            while quantity > 0:
+                max_quantity = 500
+                
+                for harvester in self.harvesters:
+                    amount = min(max_quantity, quantity)
+                    quantity -= amount
+                    posts = harvester.get_posts(days=self.days, quantity=amount)
+                    
+                    for post in posts:
+                        self._insert_entry(
+                            cursor=cursor,
+                            harvester_name=harvester.get_name(),
+                            post=post
+                        )
+
+                time.sleep(self.delay)

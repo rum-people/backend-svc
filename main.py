@@ -88,10 +88,11 @@ def get_posts(response: Response, keyword: str | None=None, social_network: str 
         data = cursor.fetchall()
 
     return [{
-        'text' : row[2],
-        'link' : row[5],
+        'title': row[2],
+        'text' : row[3],
+        'link' : row[6],
         'socialNetwork': row[1],
-        'emotion' : row[4], 
+        'emotion' : row[5], 
     } for row in data]
 
 

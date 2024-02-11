@@ -72,6 +72,7 @@ class RedditPostsHarvester(BasePostsHarvester):
             post_data = post['data']
             unix_timestamp = int(post_data['created_utc'])
             posts.append({
+                'title': post_data['title'],
                 'text': post_data['title'] + "\n" + post_data['selftext'],
                 'created_utc': datetime.utcfromtimestamp(unix_timestamp).strftime('%Y-%m-%d %H:%M:%S'),
                 'link': self.base_link + post_data['permalink']
