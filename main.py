@@ -34,13 +34,13 @@ connection.commit()
 scrapper = Scrapper(
 
     harvesters=[
-        NewsAPIPostsHarvester(
-            api_key='44ab7e7749c24d5784915ae2cc224d0f'
-        ),
         RedditPostsHarvester(use_script = "XYvimDksXdYhPOM2uA5tdg",
         secret = "FD0xriKOeZF155WK5X4jrqrA_4PMyQ",
         username = "Inner_Painter9381",
-        password = "gSqp34igj$^a%wK")],
+        password = "gSqp34igj$^a%wK"),
+        NewsAPIPostsHarvester(
+            api_key='44ab7e7749c24d5784915ae2cc224d0f'
+        )],
     keywords_extractor=keyword_extractor_bert,
     sentiment_analysator=sentiment_analyser_bert,
     connection=connection,
