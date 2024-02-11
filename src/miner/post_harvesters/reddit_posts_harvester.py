@@ -47,6 +47,9 @@ class RedditPostsHarvester(BasePostsHarvester):
                 'fullname': None
             }
             self.subredits_data.append(subredit_data)
+        self.delta = timedelta(days=1)
+        self.current_date = datetime.now() - self.delta
+
 
 
     def get_posts(self, days: int, quantity: int=-1) -> list:
@@ -54,15 +57,12 @@ class RedditPostsHarvester(BasePostsHarvester):
             quantity = 1500
         
         
-        delta = timedelta(days=1)
-        current_date = datetime.now() - delta
         posts_per_day = quantity//30
         posts = []
 
-        for i in range(days):
-            new_posts = self.get_posts_for_date(current_date, 100, self.subredits_data)
-            posts.extend(new_posts)
-            current_date -= delta
+        new_posts = self.get_posts_for_date(self.current_date, 100, self.subredits_data)
+        posts.extend(new_posts)
+        self.current_date -= self.delta
         
         return posts
     

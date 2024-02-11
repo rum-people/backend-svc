@@ -23,6 +23,7 @@ class NewsAPIPostsHarvester(BasePostsHarvester):
         self.http = _NewsAPIHttpConnector(api_key)
         self.url = "https://newsapi.org/v2/everything"
         self.max_posts_per_request = 100
+        self.date = dt.datetime.today() - dt.timedelta(days=1)
     
     def get_posts(self, days: int, quantity: int=-1) -> list:
         if quantity == -1:
@@ -31,14 +32,11 @@ class NewsAPIPostsHarvester(BasePostsHarvester):
         posts_per_day = quantity//days
         
         posts = []
-        date = dt.datetime.today()
-        date -= dt.timedelta(days=1)
 
-        for i in range(days):
-            date_str = date.strftime('%Y-%m-%d')
-            next_posts = self.get_posts_by_date(date_str, posts_per_day)
-            posts.extend(next_posts)
-            date -= dt.timedelta(days=1)
+        date_str = self.date.strftime('%Y-%m-%d')
+        next_posts = self.get_posts_by_date(date_str, 100)
+        posts.extend(next_posts)
+        self.date -= dt.timedelta(days=1)
         
         return posts
 

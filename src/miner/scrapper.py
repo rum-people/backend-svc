@@ -77,14 +77,15 @@ class Scrapper(Thread):
 
             quantity = self.quantity
             for harvester in self.harvesters:
-                posts = harvester.get_posts(days=self.days, quantity=quantity)
+                for i in range(30):
+                    posts = harvester.get_posts(days=self.days, quantity=quantity)
 
-                print("len", len(posts), flush=True)
-                for post in posts:
-                    self._insert_entry(
-                        cursor=cursor,
-                        harvester_name=harvester.get_name(),
-                        post=post
-                    )
+                    print("len", len(posts), flush=True)
+                    for post in posts:
+                        self._insert_entry(
+                            cursor=cursor,
+                            harvester_name=harvester.get_name(),
+                            post=post
+                        )
 
             time.sleep(self.delay)
