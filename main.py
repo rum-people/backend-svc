@@ -168,7 +168,7 @@ def get_analytics_keywords(response: Response, days: int, keyword : str, social_
 
             current_date -= delta
 
-    return result
+    return result[::-1]
 
 
 @app.get('/analytics/sentiment')
@@ -218,16 +218,18 @@ def get_analytics_sentiment(response: Response, days: int, social_network: str |
                 ''', (text_date, keyword))
             rows = cursor.fetchall()
 
+            total = sum(map(lambda value: value[1], rows))
+
             data.append({
                 'timestamp' : datetime.strftime(current_date, '%Y/%m/%d %H:%M:%S'),
                 'emotions' : [
                     {
                         'label' : row[0],
-                        'frequency' : row[1]
+                        'frequency' : row[1] / total
                     } for row in rows
                 ]
             })
 
             current_date -= delta
 
-    return data
+    return data[::-1]
