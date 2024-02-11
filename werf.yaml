@@ -5,8 +5,7 @@ image: service
 from: python:3.10-bullseye
 docker:
   WORKDIR: /app
-  ENTRYPOINT: uvicorn
-  CMD: [ "main:app", "--reload" , "--host", "0.0.0.0"]
+  ENTRYPOINT: [ "uvicorn", "main:app", "--reload" , "--host", "0.0.0.0" ]
 git:
   - add: /
     to: /app
