@@ -1,2 +1,3 @@
 from .base_posts_harvester import BasePostsHarvester
 from .reddit_posts_harvester import RedditPostsHarvester
+from .newsapi_posts_harvester import NewsAPIPostsHarvester
