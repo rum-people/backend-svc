@@ -15,3 +15,4 @@ git:
 shell:
   setup:
     - pip3 install --no-cache -r /app/requirements.txt
+    - mkdir -p /root/.cache/huggingface/hub # this is needed to store AI weights 
