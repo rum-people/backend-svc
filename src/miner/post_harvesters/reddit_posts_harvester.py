@@ -35,7 +35,7 @@ class RedditPostsHarvester(BasePostsHarvester):
         self.http = _RedditHttpConnector(use_script, secret, username, password)
         self.popular_subredits_endpoint = "https://oauth.reddit.com/subreddits/popular"
         self.subredit_popular_template = 'https://oauth.reddit.com{}/hot'
-        self.number_of_popular_subredits = 50
+        self.number_of_popular_subredits = 7
         self.max_posts_per_request = 20
         self.base_link = "https://www.reddit.com"
 
@@ -75,34 +75,26 @@ class RedditPostsHarvester(BasePostsHarvester):
 
     def get_posts_for_date(self, date, quantity, subredits_data):
         posts = []
-        while quantity > 0:
-            
-            for subredit in subredits_data:
-                finding_point = False
-                intermidiate_point = False
-                while not finding_point:
-                    if quantity <= 0:
-                        break
+        for subredit in subredits_data:
+            finding_point = False
+            intermidiate_point = False
+            while not finding_point:
 
-                    if not intermidiate_point:
-                        number_of_posts = 100
-                    else:
-                        number_of_posts = min(quantity, self.max_posts_per_request)
-                    params = {'limit': number_of_posts, 'after': subredit['fullname']}
-                    posts_data = self.http.get(self.subredit_popular_template.format(subredit['url']), params)
-                    if posts_data.get('data', None) is None:
-                        break
-                    subredit['fullname'] = posts_data['data']['after']
-                    converted_datra = self.convert(posts_data)
-                    if self.is_accepted_date(date, converted_datra) and not intermidiate_point:
-                        intermidiate_point = True
-                        continue
-                    if intermidiate_point:
-                        finding_point = True
-                    print("post_data", len(converted_datra), flush=True)
+                number_of_posts = 100
+                params = {'limit': number_of_posts, 'after': subredit['fullname']}
+                posts_data = self.http.get(self.subredit_popular_template.format(subredit['url']), params)
+                if posts_data.get('data', None) is None:
+                    break
+                subredit['fullname'] = posts_data['data']['after']
+                converted_datra = self.convert(posts_data)
+                if self.is_accepted_date(date, converted_datra) and not intermidiate_point:
+                    intermidiate_point = True
+                    continue
+                if intermidiate_point:
+                    finding_point = True
+                print("post_data", len(converted_datra), flush=True)
 
-                    quantity -= number_of_posts
-                    posts.extend(converted_datra)
+                posts.extend(converted_datra)
             
         return posts
 

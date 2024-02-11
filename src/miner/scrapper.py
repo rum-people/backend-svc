@@ -78,8 +78,8 @@ class Scrapper(Thread):
             quantity = self.quantity
             for harvester in self.harvesters:
                 posts = harvester.get_posts(days=self.days, quantity=quantity)
-                quantity -= len(posts)
-                print("quantity", quantity, flush=True)
+
+                print("len", len(posts), flush=True)
                 for post in posts:
                     self._insert_entry(
                         cursor=cursor,
