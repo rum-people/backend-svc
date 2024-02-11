@@ -40,7 +40,8 @@ scrapper = Scrapper(
     keywords_extractor=keyword_extractor_bert,
     sentiment_analysator=sentiment_analyser_bert,
     connection=connection,
-    quantity=1000
+    days=7,
+    quantity=500
 )
 
 scrapper.start()
