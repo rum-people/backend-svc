@@ -76,19 +76,15 @@ class Scrapper(Thread):
             cursor = self.connection.cursor()
 
             quantity = self.quantity
-            while quantity > 0:
-                max_quantity = 500
-                
-                for harvester in self.harvesters:
-                    amount = min(max_quantity, quantity)
-                    quantity -= amount
-                    posts = harvester.get_posts(days=self.days, quantity=amount)
-                    
-                    for post in posts:
-                        self._insert_entry(
-                            cursor=cursor,
-                            harvester_name=harvester.get_name(),
-                            post=post
-                        )
+            for harvester in self.harvesters:
+                posts = harvester.get_posts(days=self.days, quantity=quantity)
+                quantity -= len(posts)
+                print("quantity", quantity, flush=True)
+                for post in posts:
+                    self._insert_entry(
+                        cursor=cursor,
+                        harvester_name=harvester.get_name(),
+                        post=post
+                    )
 
-                time.sleep(self.delay)
+            time.sleep(self.delay)

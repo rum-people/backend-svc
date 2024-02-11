@@ -29,6 +29,8 @@ connection = psycopg2.connect(database=DATABASE_NAME,
 with connection.cursor() as cursor:
     cursor.execute(open('schema/init.sql', 'r').read())
 
+connection.commit()
+
 scrapper = Scrapper(
     harvesters=[RedditPostsHarvester(use_script = "XYvimDksXdYhPOM2uA5tdg",
         secret = "FD0xriKOeZF155WK5X4jrqrA_4PMyQ",
@@ -40,8 +42,8 @@ scrapper = Scrapper(
     keywords_extractor=keyword_extractor_bert,
     sentiment_analysator=sentiment_analyser_bert,
     connection=connection,
-    days=7,
-    quantity=500
+    days=30,
+    quantity=1500
 )
 
 scrapper.start()
