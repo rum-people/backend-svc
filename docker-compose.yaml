@@ -1,0 +1,37 @@
+services:
+  backend-svc:
+    build: .
+    restart: unless-stopped
+    ports:
+      - 8000:8000
+    environment:
+      - DATABASE_HOST=backend-svc-pgdb
+      - DATABASE_PORT=5432
+      - DATABASE_USER=backend-svc
+      - DATABASE_PASSWORD=backend-svc
+      - DATABASE_NAME=backend-svc
+    depends_on:
+      backend-svc-pgdb:
+        condition: service_healthy
+    volumes:
+      - ./weights:/root/.cache/huggingface/hub
+
+  backend-svc-pgdb:
+    image: postgres:16.1-alpine3.19
+    restart: always
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    environment:
+      - POSTGRES_USER=backend-svc
+      - POSTGRES_PASSWORD=backend-svc
+      - POSTGRES_DB=backend-svc
+    volumes:
+      - backend-svc-pgdb-data:/var/lib/postgresql/data    
+
+volumes:
+  backend-svc-pgdb-data:

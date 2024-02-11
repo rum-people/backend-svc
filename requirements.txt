@@ -1,0 +1,9 @@
+fastapi
+numpy
+pandas
+uvicorn[standard]
+yake
+keybert
+psycopg2
+transformers
+python-dotenv
