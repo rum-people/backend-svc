@@ -36,7 +36,7 @@ class RedditPostsHarvester(BasePostsHarvester):
         self.popular_subredits_endpoint = "https://oauth.reddit.com/subreddits/popular"
         self.subredit_popular_template = 'https://oauth.reddit.com{}/hot'
         self.number_of_popular_subredits = 50
-        self.max_posts_per_request = 50
+        self.max_posts_per_request = 20
         self.base_link = "www.reddit.com"
 
     def get_posts(self, days: int, quantity: int=-1) -> list:
