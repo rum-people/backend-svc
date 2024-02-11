@@ -87,14 +87,15 @@ class RedditPostsHarvester(BasePostsHarvester):
                     break
                 subredit['fullname'] = posts_data['data']['after']
                 converted_datra = self.convert(posts_data)
-                if self.is_accepted_date(date, converted_datra) and not intermidiate_point:
+                if not self.is_accepted_date(date, converted_datra):
+                    continue
+                if not intermidiate_point:
                     intermidiate_point = True
                     continue
                 finding_point = True
                 print("post_data", len(converted_datra), flush=True)
 
                 posts.extend(converted_datra)
-            
         return posts
 
     def convert(self, json_data):
