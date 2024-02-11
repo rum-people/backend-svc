@@ -46,6 +46,12 @@ scrapper = Scrapper(
 
 scrapper.start()
 
+def extract_providers_query(row_name, filters_list):
+    if filters_list is None:
+        return ''
+    
+    str = '(' + 'OR '.join([ (row_name + ' = %s') % name for name in filters_list.split(',')]) + ') AND '
+    return str
 
 @app.get('/')
 def get_test_connection():
@@ -66,10 +72,7 @@ def get_sentiment_analysis(text: str):
 
 @app.get('/posts')
 def get_posts(keyword: str | None=None, social_network: str | None=None, quantity: int | None=10):
-    if social_network is not None:
-        providers = ' OR '.join(['p.provider_name = %s' % name for name in social_network.split(',')]) + ' AND '
-    else:
-        providers = ''
+    providers = extract_providers_query('p.provider_name', social_network)
 
     with connection.cursor() as cursor:
         cursor.execute('''
@@ -94,29 +97,26 @@ def get_posts(keyword: str | None=None, social_network: str | None=None, quantit
 @app.get('/analytics/keywords/top')
 def get_top_keywords(days: int, social_network: str | None=None):
     with connection.cursor() as cursor:
-        if social_network is not None:
-            providers = ' OR '.join(['provider_name = %s' % name for name in social_network.split(',')]) + ' AND '
-        else:
-            providers = ''
+        providers = extract_providers_query('provider_name', social_network)
 
         cursor.execute('''
-                                SELECT
-                                    keyword,
-                                    COUNT(*) AS keyword_count
-                                FROM
-                                    post_keywords
-                                JOIN
-                                    posts ON post_keywords.post_id = posts.id
-                                WHERE
-                                    %s
-                                    created_at >= NOW() - INTERVAL '%s' DAY 
-                                GROUP BY
-                                    keyword
-                                ORDER BY
-                                    keyword_count DESC
-                                LIMIT
-                                    10;
-                            ''', (providers, days,))
+                        SELECT
+                            keyword,
+                            COUNT(*) AS keyword_count
+                        FROM
+                            post_keywords
+                        JOIN
+                            posts ON post_keywords.post_id = posts.id
+                        WHERE
+                            %s
+                            created_at >= NOW() - INTERVAL '%s' DAY 
+                        GROUP BY
+                            keyword
+                        ORDER BY
+                            keyword_count DESC
+                        LIMIT
+                            10;
+                    ''', (providers, days,))
             
         data = cursor.fetchall()
 
@@ -127,10 +127,8 @@ def get_top_keywords(days: int, social_network: str | None=None):
 def get_analytics_keywords(days: int, keyword : str, social_network: str | None=None):
     result = []
     with connection.cursor() as cursor:
-        if social_network is not None:
-            providers = ' OR '.join(['p.provider_name = %s' % name for name in social_network.split(',')]) + ' AND '
-        else:
-            providers = ''
+        providers = extract_providers_query('p.provider_name', social_network)
+
         current_date = datetime.now()
         delta = timedelta(days=1)
 
@@ -183,10 +181,7 @@ def get_analytics_sentiment(days: int, social_network: str | None=None, keyword 
             text_date = datetime.strftime(current_date, '%Y-%m-%d')
 
             if keyword is None:
-                if social_network is not None:
-                    providers = ' OR '.join(['provider_name = %s' % name for name in social_network.split(',')]) + ' AND '
-                else:
-                    providers = ''
+                providers = extract_providers_query('provider_name', social_network)
 
                 cursor.execute('''
                                 SELECT
@@ -201,10 +196,7 @@ def get_analytics_sentiment(days: int, social_network: str | None=None, keyword 
                                     emotional_trait;
                             ''', (providers, text_date))
             else:
-                if social_network is not None:
-                    providers = ' OR '.join(['p.provider_name = %s' % name for name in social_network.split(',')]) + ' AND '
-                else:
-                    providers = ''
+                providers = extract_providers_query('p.provider_name', social_network)
 
                 cursor.execute('''
                     SELECT
