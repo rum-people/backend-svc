@@ -34,7 +34,7 @@ class RedditPostsHarvester(BasePostsHarvester):
     def __init__(self, use_script, secret, username, password):
         self.http = _RedditHttpConnector(use_script, secret, username, password)
         self.popular_subredits_endpoint = "https://oauth.reddit.com/subreddits/popular"
-        self.subredit_popular_template = 'https://oauth.reddit.com{}/hot'
+        self.subredit_popular_template = 'https://oauth.reddit.com{}/new'
         self.number_of_popular_subredits = 5
         self.max_posts_per_request = 20
         self.base_link = "https://www.reddit.com"
