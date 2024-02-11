@@ -58,9 +58,8 @@ class NewsAPIPostsHarvester(BasePostsHarvester):
     
     def convert(self, json_data):
         posts = []
-        if post.get('articles', None) is None:
+        if json_data.get('articles', None) is None:
             return posts
-        
         for post in json_data['articles']:
             title = ""
             if not(post.get('title', None) is None):
