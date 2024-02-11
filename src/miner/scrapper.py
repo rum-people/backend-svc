@@ -61,10 +61,8 @@ class Scrapper(Thread):
 
         id = cursor.fetchone()[0]
         _keywords = self.keyword_extractor.predict(texts=[text])
-        print('Keywords: ', _keywords)
         if len(_keywords) > 0:
             for keyword in _keywords:
-                print('Keyword: ', keyword)
                 cursor.execute('''INSERT INTO post_keywords (post_id, keyword)
                                     VALUES (%s, %s);
                                     ''', (str(id), keyword[0]))
