@@ -50,7 +50,7 @@ def extract_providers_query(row_name, filters_list):
     if filters_list is None:
         return ''
     
-    str = '(' + 'OR '.join([ (row_name + ' = %s') % name for name in filters_list.split(',')]) + ') AND '
+    str = '(' + 'OR '.join([ (row_name + " = '%s'") % name for name in filters_list.split(',')]) + ') AND '
     return str
 
 @app.get('/')
@@ -74,7 +74,7 @@ def get_sentiment_analysis(text: str):
 def get_posts(response: Response, keyword: str | None=None, social_network: str | None=None, quantity: int | None=10):
     response.headers['Access-Control-Allow-Origin'] = '*'
     providers = extract_providers_query('p.provider_name', social_network)
-
+    print(providers)
     with connection.cursor() as cursor:
         cursor.execute('''
             SELECT * FROM posts p 
