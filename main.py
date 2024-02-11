@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 from src.model.keywords import KeywordExtractorKeyBERT
 from src.model.sentiment import BertSentimentAnalyser
-from src.miner.post_harvesters import RedditPostsHarvester
+from src.miner.post_harvesters import RedditPostsHarvester, NewsAPIPostsHarvester
 from src.miner.scrapper import Scrapper
 import psycopg2
 import os
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 
@@ -32,11 +33,15 @@ scrapper = Scrapper(
     harvesters=[RedditPostsHarvester(use_script = "XYvimDksXdYhPOM2uA5tdg",
         secret = "FD0xriKOeZF155WK5X4jrqrA_4PMyQ",
         username = "Inner_Painter9381",
-        password = "gSqp34igj$^a%wK")],
+        password = "gSqp34igj$^a%wK"),
+        NewsAPIPostsHarvester(
+            api_key='17712fe5c46f444ca38f3979cb0b5d3f'
+        )],
     keywords_extractor=keyword_extractor_bert,
     sentiment_analysator=sentiment_analyser_bert,
     connection=connection,
-    quantity=1000
+    days=7,
+    quantity=500
 )
 
 scrapper.start()
@@ -61,54 +66,173 @@ def get_sentiment_analysis(text: str):
 
 @app.get('/posts')
 def get_posts(keyword: str | None=None, social_network: str | None=None, quantity: int | None=10):
+    if social_network is not None:
+        providers = ' OR '.join(['p.provider_name = %s' % name for name in social_network.split(',')]) + ' AND '
+    else:
+        providers = ''
+
+    with connection.cursor() as cursor:
+        cursor.execute('''
+            SELECT * FROM posts p 
+            JOIN post_keywords pk ON p.id = pk.post_id
+            WHERE 
+                %s
+                pk.keyword = %s
+            LIMIT %s;
+        ''', (providers, keyword, quantity))
+
+        data = cursor.fetchall()
+
     return [{
-        'post' : 'link or text',
-        'socialNetwork': 'reddit',
-        'emotions' : [
-            {
-                'label' : 'joy',
-                'value' : 0.3
-            },
-            {
-                'label' : 'anger',
-                'value' : 0.4
-            },
-            {
-                'label' : 'fear',
-                'value' : 0.9
-            }
-        ] 
-    }]
+        'text' : row[2],
+        'link' : row[5],
+        'socialNetwork': row[1],
+        'emotion' : row[4], 
+    } for row in data]
+
+
+@app.get('/analytics/keywords/top')
+def get_top_keywords(days: int, social_network: str | None=None):
+    with connection.cursor() as cursor:
+        if social_network is not None:
+            providers = ' OR '.join(['provider_name = %s' % name for name in social_network.split(',')]) + ' AND '
+        else:
+            providers = ''
+
+        cursor.execute('''
+                                SELECT
+                                    keyword,
+                                    COUNT(*) AS keyword_count
+                                FROM
+                                    post_keywords
+                                JOIN
+                                    posts ON post_keywords.post_id = posts.id
+                                WHERE
+                                    %s
+                                    created_at >= NOW() - INTERVAL '%s' DAY 
+                                GROUP BY
+                                    keyword
+                                ORDER BY
+                                    keyword_count DESC
+                                LIMIT
+                                    10;
+                            ''', (providers, days,))
+            
+        data = cursor.fetchall()
+
+    return [{'keyword': row[0], 'frequency': row[1]} for row in data]
 
 
 @app.get('/analytics/keywords')
-def get_analytics_keywords(days: int, social_network: str | None=None, keyword : str | None=None):
-    return [
-        {
-            'keyword' : 'some_keyword',
-            'timestamp' : 'DD/MM/YY HH:MM:SS',
-            'frequency' : 10
-        },
-    ]
+def get_analytics_keywords(days: int, keyword : str, social_network: str | None=None):
+    result = []
+    with connection.cursor() as cursor:
+        if social_network is not None:
+            providers = ' OR '.join(['p.provider_name = %s' % name for name in social_network.split(',')]) + ' AND '
+        else:
+            providers = ''
+        current_date = datetime.now()
+        delta = timedelta(days=1)
+
+        for _ in range(days):
+            
+            text_date = datetime.strftime(current_date, '%Y-%m-%d')
+
+            cursor.execute(
+                    '''
+                        SELECT
+                            p.provider_name,
+                            pk.keyword,
+                            COUNT(*) AS keyword_count
+                        FROM
+                            post_keywords pk
+                        JOIN
+                            posts p ON pk.post_id = p.id
+                        WHERE
+                            %s
+                            DATE(p.created_at) = %s
+                            AND pk.keyword = %s
+                        GROUP BY
+                            pk.keyword;
+                    ''', (providers, text_date, keyword)
+            )
+            data = cursor.fetchall()
+
+            temp = [{
+                    'socialNetwork': row[0],
+                    'keyword': row[1],
+                    'frequency': row[2],
+                    'timestamp': datetime.strftime(current_date, '%Y/%m/%d %H:%M:%S')
+            } for row in data]
+            result.extend(temp)
+
+            current_date -= delta
+
+    return result
+
 
 @app.get('/analytics/sentiment')
 def get_analytics_sentiment(days: int, social_network: str | None=None, keyword : str | None=None):
-    return [
-        {
-            'emotions' : [
-                {
-                    'label' : 'joy',
-                    'value' : 0.3
-                },
-                {
-                    'label' : 'anger',
-                    'value' : 0.4
-                },
-                {
-                    'label' : 'fear',
-                    'value' : 0.9
-                }
-            ],
-            'timestamp' : 'DD/MM/YY HH:MM:SS'
-        }
-    ]
+    data = []
+
+    with connection.cursor() as cursor:
+        delta = timedelta(days=1)
+        current_date = datetime.now()
+
+        for _ in range(days):
+            text_date = datetime.strftime(current_date, '%Y-%m-%d')
+
+            if keyword is None:
+                if social_network is not None:
+                    providers = ' OR '.join(['provider_name = %s' % name for name in social_network.split(',')]) + ' AND '
+                else:
+                    providers = ''
+
+                cursor.execute('''
+                                SELECT
+                                    emotional_trait,
+                                    COUNT(*) AS trait_count
+                                FROM
+                                    posts
+                                WHERE
+                                    %s
+                                    DATE(created_at) = %s
+                                GROUP BY
+                                    emotional_trait;
+                            ''', (providers, text_date))
+            else:
+                if social_network is not None:
+                    providers = ' OR '.join(['p.provider_name = %s' % name for name in social_network.split(',')]) + ' AND '
+                else:
+                    providers = ''
+
+                cursor.execute('''
+                    SELECT
+                        p.emotional_trait,
+                        COUNT(*) AS trait_count
+                    FROM
+                        posts p
+                    JOIN
+                        post_keywords pk ON p.id = pk.post_id
+                    WHERE
+                        %s
+                        DATE(p.created_at) = %s
+                        AND pk.keyword = %s
+                    GROUP BY
+                        p.emotional_trait;
+                ''', (providers, text_date, keyword))
+            rows = cursor.fetchall()
+
+            data.append({
+                'timestamp' : datetime.strftime(current_date, '%Y/%m/%d %H:%M:%S'),
+                'emotions' : [
+                    {
+                        'label' : row[0],
+                        'frequency' : row[1]
+                    } for row in rows
+                ]
+            })
+
+            current_date -= delta
+
+    return data
