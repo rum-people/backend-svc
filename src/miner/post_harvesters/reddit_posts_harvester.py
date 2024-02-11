@@ -1,5 +1,6 @@
 from .base_posts_harvester import BasePostsHarvester
 import requests
+from datetime import datetime
 
 class _RedditHttpConnector:
     def __init__(self, use_script, secret, username, password):
@@ -69,9 +70,10 @@ class RedditPostsHarvester(BasePostsHarvester):
         posts = []
         for post in json_data['data']['children']:
             post_data = post['data']
+            unix_timestamp = int(post_data['created_utc'])
             posts.append({
                 'text': post_data['title'] + "\n" + post_data['selftext'],
-                'created_utc': post_data['created_utc'],
+                'created_utc': datetime.utcfromtimestamp(unix_timestamp).strftime('%Y-%m-%d %H:%M:%S'),
                 'link': self.base_link + post_data['permalink']
             })
         

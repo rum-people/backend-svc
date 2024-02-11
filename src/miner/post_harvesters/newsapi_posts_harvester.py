@@ -66,4 +66,5 @@ class NewsAPIPostsHarvester(BasePostsHarvester):
         
         return posts
 
-        
+    def get_name(self):
+        return 'News'

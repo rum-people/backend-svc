@@ -30,10 +30,10 @@ class Scrapper(Thread):
 
     def _generate_insert_into_posts(self, harvester: BasePostsHarvester, emotional_traits: list[str], posts: list[dict]) -> str:
         values = [
-            str((harvester.get_name(), post['text'], post['created_utc'], emotional_traits[index], post['link'])) 
+            (harvester.get_name(), post['text'], post['created_utc'], emotional_traits[index], post['link'])
             for index, post in enumerate(posts)
         ]
-        return ', '.join(values)
+        return values
     
     def _extract_emotional_trait(self, raw_traits: list[dict]) -> str:
         max_score = 0
@@ -45,6 +45,30 @@ class Scrapper(Thread):
                 max_score = trait['score']
                 index_max = index
         return index_max
+    
+    def _insert_entry(self, cursor, harvester_name: str, post: dict):
+        text = post['text']
+        
+        emotional_traits_raw = self.sentiment_analysator.predict(texts=[text])[0]
+        emotional_trait = self._extract_emotional_trait(emotional_traits_raw)
+
+        cursor.execute(
+            '''
+            INSERT INTO posts (provider_name, content, created_at, emotional_trait, link)
+            VALUES (%s, %s, %s, %s, %s) RETURNING id;
+            ''', (harvester_name, text, post['created_utc'], emotional_trait, post['link'])
+        )
+
+        id = cursor.fetchone()[0]
+        _keywords = self.keyword_extractor.predict(texts=[text])
+        if len(_keywords) > 0:
+            for keyword in _keywords:
+                cursor.execute('''INSERT INTO post_keywords (post_id, keyword)
+                                    VALUES (%s, %s);
+                                    ''', (str(id), keyword[0]))
+            
+        self.connection.commit()
+
 
     def run(self):
         print('Thread on harvesting data has started!')
@@ -53,26 +77,12 @@ class Scrapper(Thread):
             
             for harvester in self.harvesters:
                 posts = harvester.get_posts(days=self.days, quantity=self.quantity)
-                texts = list(map(lambda post: post['text'], posts))
-
-                emotional_traits_raw = self.sentiment_analysator.predict(texts=texts)
-                emotional_traits = [self._extract_emotional_trait(raw_traits) for raw_traits in emotional_traits_raw]
-
-                cursor.execute('''
-                    INSERT INTO posts (provider_name, text, timestamp, emotional_trait, link)
-                    VALUES %s RETURNING id;''', self._generate_insert_into_posts(harvester, emotional_traits, posts))
                 
-                text_ids = cursor.fetchall()
-                l_keywords = self.keyword_extractor.predict(texts=texts)
-                for index, keywords in enumerate(l_keywords):
-                    for keyword in keywords:
-                        cursor.execute(
-                            '''
-                            INSERT INTO post_keywords (post_id, keyword)
-                            VALUES (%d, %s);
-                            ''', (text_ids[index], keyword)
-                        )
-
-                self.connection.commit()
+                for post in posts:
+                    self._insert_entry(
+                        cursor=cursor,
+                        harvester_name=harvester.get_name(),
+                        post=post
+                    )
 
             time.sleep(self.delay)
