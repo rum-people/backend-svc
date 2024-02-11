@@ -79,10 +79,10 @@ def get_posts(keyword: str | None=None, social_network: str | None=None, quantit
             SELECT * FROM posts p 
             JOIN post_keywords pk ON p.id = pk.post_id
             WHERE 
-                %s
+                %s''' % providers + '''
                 pk.keyword = %s
             LIMIT %s;
-        ''', (providers, keyword, quantity))
+        ''', (keyword, quantity))
 
         data = cursor.fetchall()
 
@@ -108,7 +108,7 @@ def get_top_keywords(days: int, social_network: str | None=None):
                         JOIN
                             posts ON post_keywords.post_id = posts.id
                         WHERE
-                            %s
+                            %s''' % providers + '''
                             created_at >= NOW() - INTERVAL '%s' DAY 
                         GROUP BY
                             keyword
@@ -116,7 +116,7 @@ def get_top_keywords(days: int, social_network: str | None=None):
                             keyword_count DESC
                         LIMIT
                             10;
-                    ''', (providers, days,))
+                    ''', (days,))
             
         data = cursor.fetchall()
 
@@ -139,7 +139,6 @@ def get_analytics_keywords(days: int, keyword : str, social_network: str | None=
             cursor.execute(
                     '''
                         SELECT
-                            p.provider_name,
                             pk.keyword,
                             COUNT(*) AS keyword_count
                         FROM
@@ -147,19 +146,18 @@ def get_analytics_keywords(days: int, keyword : str, social_network: str | None=
                         JOIN
                             posts p ON pk.post_id = p.id
                         WHERE
-                            %s
+                            %s''' % providers + '''
                             DATE(p.created_at) = %s
                             AND pk.keyword = %s
                         GROUP BY
                             pk.keyword;
-                    ''', (providers, text_date, keyword)
+                    ''', (text_date, keyword)
             )
             data = cursor.fetchall()
 
             temp = [{
-                    'socialNetwork': row[0],
-                    'keyword': row[1],
-                    'frequency': row[2],
+                    'keyword': row[0],
+                    'frequency': row[1],
                     'timestamp': datetime.strftime(current_date, '%Y/%m/%d %H:%M:%S')
             } for row in data]
             result.extend(temp)
@@ -190,11 +188,11 @@ def get_analytics_sentiment(days: int, social_network: str | None=None, keyword 
                                 FROM
                                     posts
                                 WHERE
-                                    %s
+                            %s''' % providers + '''
                                     DATE(created_at) = %s
                                 GROUP BY
                                     emotional_trait;
-                            ''', (providers, text_date))
+                            ''', ( text_date, ))
             else:
                 providers = extract_providers_query('p.provider_name', social_network)
 
@@ -207,12 +205,12 @@ def get_analytics_sentiment(days: int, social_network: str | None=None, keyword 
                     JOIN
                         post_keywords pk ON p.id = pk.post_id
                     WHERE
-                        %s
+                            %s''' % providers + '''
                         DATE(p.created_at) = %s
                         AND pk.keyword = %s
                     GROUP BY
                         p.emotional_trait;
-                ''', (providers, text_date, keyword))
+                ''', (text_date, keyword))
             rows = cursor.fetchall()
 
             data.append({
