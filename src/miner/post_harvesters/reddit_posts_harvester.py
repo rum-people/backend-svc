@@ -35,7 +35,7 @@ class RedditPostsHarvester(BasePostsHarvester):
         self.http = _RedditHttpConnector(use_script, secret, username, password)
         self.popular_subredits_endpoint = "https://oauth.reddit.com/subreddits/popular"
         self.subredit_popular_template = 'https://oauth.reddit.com{}/hot'
-        self.number_of_popular_subredits = 7
+        self.number_of_popular_subredits = 5
         self.max_posts_per_request = 20
         self.base_link = "https://www.reddit.com"
 
@@ -89,9 +89,7 @@ class RedditPostsHarvester(BasePostsHarvester):
                 converted_datra = self.convert(posts_data)
                 if not self.is_accepted_date(date, converted_datra):
                     continue
-                if not intermidiate_point:
-                    intermidiate_point = True
-                    continue
+
                 finding_point = True
                 print("post_data", len(converted_datra), flush=True)
 
