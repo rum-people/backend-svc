@@ -37,6 +37,10 @@ class NewsAPIPostsHarvester(BasePostsHarvester):
         next_posts = self.get_posts_by_date(date_str, 100)
         posts.extend(next_posts)
         self.date -= dt.timedelta(days=1)
+        date_str = self.date.strftime('%Y-%m-%d')
+        next_posts = self.get_posts_by_date(date_str, 100)
+        posts.extend(next_posts)
+        self.date -= dt.timedelta(days=1)
         
         return posts
 
@@ -55,9 +59,15 @@ class NewsAPIPostsHarvester(BasePostsHarvester):
     def convert(self, json_data):
         posts = []
         for post in json_data['articles']:
+            title = ""
+            if not(post.get('title', None) is None):
+                title = post['title']
+            description = ""
+            if not(post.get('description', None) is None):
+                description = post['description']
             posts.append({
-                'title': post['title'],
-                'text': post['title'] + "\n" + post['description'],
+                'title': title,
+                'text': title + "\n" + description,
                 'created_utc': post['publishedAt'], # need to convert to utc timestamp
                 'link': post['url']
             })
